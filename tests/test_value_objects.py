@@ -69,6 +69,10 @@ class TestIMONumber:
     def test_rejects_malformed_value(self, bad_value):
         with pytest.raises(ValueError):
             IMONumber(value=bad_value)
+    
+    def test_rejects_invalid_checksum(self):
+        with pytest.raises(ValueError):
+            IMONumber(value="IMO9074720")
 
     # A well-formed IMO number is accepted and stored unchanged.
     def test_accepts_valid_value(self):
