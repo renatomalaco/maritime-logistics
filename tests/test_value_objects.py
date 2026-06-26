@@ -14,7 +14,7 @@ way around.
 import pytest
 
 from domain.value_objects import Tonnage, Coordinate, IMONumber
-
+from domain.value_objects import Cargo, Port, Distance, Route
 
 class TestTonnage:
     # Invariant: a Tonnage value can never be negative.
@@ -77,3 +77,62 @@ class TestIMONumber:
     # A well-formed IMO number is accepted and stored unchanged.
     def test_accepts_valid_value(self):
         assert IMONumber(value="IMO9074729").value == "IMO9074729"
+
+class TestCargo:
+    def test_rejects_empty_commodity(self):
+        with pytest.raises(ValueError):
+            Cargo(commodity="", weight=Tonnage(50000))
+
+    def test_rejects_zero_weight(self):
+        with pytest.raises(ValueError):
+            Cargo(commodity="soybean", weight=Tonnage(0))
+
+    def test_accepts_cargo(self):
+        cargo = Cargo("soybean", Tonnage(50000))
+        assert cargo.commodity == "soybean"
+        assert cargo.weight.value == 50000
+
+class TestPort:
+    @pytest.mark.parametrize(
+        "test_name, test_locode",
+        [
+            ("", "BR"),             # empty name
+            ("Santos", "brssz"),    # locode lower case
+        ]
+    )
+    def test_rejects_port(self, test_name, test_locode):
+        valid_coordinate = Coordinate(-23.95, -46.33)
+        with pytest.raises(ValueError):
+            Port(name=test_name, locode=test_locode, coordinate=valid_coordinate)
+
+    def test_accepts_port(self):
+        port = Port("Santos", "BRSSZ", Coordinate(-23.95, -46.33))
+        assert port.locode == "BRSSZ"
+
+class TestDistance:
+    def test_rejects_negative_distances(self):
+        with pytest.raises(ValueError):
+            Distance(nautical_miles=-1.0)
+
+    def test_accepts_zero_and_positive(self):
+        assert Distance(nautical_miles=0.0).nautical_miles == 0.0
+
+class TestRoute:
+    def test_rejects_fewer_than_two_waypoints(self):
+        single = Coordinate(-23.95, -46.33)
+        with pytest.raises(ValueError):
+            Route(
+                # single element tuple
+                waypoints=(single,),
+                total_distance=Distance(nautical_miles=0.0)
+            )
+    
+    def test_accepts_valid_route(self):
+        santos = Coordinate(-23.95, -46.33)
+        shangai = Coordinate(31.23, 121.47)
+        route = Route(
+            waypoints=(santos, shangai),
+            total_distance=Distance(nautical_miles=10500.0),
+        )
+        assert len(route.waypoints) == 2
+        assert route.total_distance.nautical_miles == 10500.0
