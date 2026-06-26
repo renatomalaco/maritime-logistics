@@ -27,3 +27,11 @@ class IMONumber:
     def __post_init__(self):
         if not re.fullmatch(r"IMO\d{7}", self.value):
             raise ValueError("IMO number must be 'IMO' followed by 7 digits")
+        
+        digits = self.value[3:]
+        weights = (7, 6, 5, 4, 3, 2)
+        check_digit = int(digits[6])
+        checksum = sum(int(d) * w for d,
+                       w in zip(digits[:6], weights))
+        if checksum % 10 != check_digit:
+            raise ValueError("IMO number has an invalid check digit")
