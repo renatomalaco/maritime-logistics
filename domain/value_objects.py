@@ -80,3 +80,11 @@ class VoyageStatus(Enum):
     PLANNED = "PLANNED"
     DEPARTED = "DEPARTED"
     ARRIVED = "ARRIVED"
+
+@dataclass(frozen=True)
+class VoyageId:
+    value: str
+
+    def __post_init__(self):
+        if not self.value.strip():
+            raise ValueError("VoyageId must not be empty")
