@@ -1,4 +1,5 @@
 import re
+import math
 from enum import Enum
 from dataclasses import dataclass
 
@@ -20,6 +21,20 @@ class Coordinate:
             raise ValueError("The latitude must be between -90 and 90 degrees")
         if self.longitude < -180 or self.longitude > 180:
             raise ValueError("The longitude must be between -180 and 180 degrees")
+    
+    # The quotation marks around "Coordinate" and "Distance" in the type hints 
+    # used to indicate forward references. This is necessary because the classes 
+    # are defined later in the code
+    def distance_to(self, other: "Coordinate") -> "Distance":
+        earth_radius_nautical_miles = 3440.065
+        lat1 = math.radians(self.latitude)
+        lat2 = math.radians(other.latitude)
+        distance_lat = math.radians(other.latitude - self.latitude)
+        distance_lon = math.radians(other.longitude - self.longitude)
+        a = (math.sin(distance_lat / 2) ** 2
+            + math.cos(lat1) * math.cos(lat2) * math.sin(distance_lon / 2) ** 2)
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+        return Distance(nautical_miles=earth_radius_nautical_miles * c)
 
 @dataclass(frozen=True)
 class IMONumber:
