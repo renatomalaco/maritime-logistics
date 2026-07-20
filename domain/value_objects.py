@@ -103,3 +103,11 @@ class VoyageId:
     def __post_init__(self):
         if not self.value.strip():
             raise ValueError("VoyageId must not be empty")
+
+@dataclass(frozen=True)     
+class FuelRate:
+    tonnes_per_nautical_mile: float
+
+    def __post_init__(self):
+        if self.tonnes_per_nautical_mile <= 0:
+            raise ValueError(...)

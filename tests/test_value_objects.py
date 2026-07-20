@@ -14,7 +14,7 @@ way around.
 import pytest
 
 from domain.value_objects import Tonnage, Coordinate, IMONumber
-from domain.value_objects import Cargo, Port, Distance, Route
+from domain.value_objects import Cargo, Port, Distance, Route, FuelRate
 
 class TestTonnage:
     # Invariant: a Tonnage value can never be negative.
@@ -136,3 +136,16 @@ class TestRoute:
         )
         assert len(route.waypoints) == 2
         assert route.total_distance.nautical_miles == 10500.0
+
+class TestFuelRate:
+    def test_stores_valid_rate(self):
+        rate = FuelRate(tonnes_per_nautical_mile=0.3)
+        assert rate.tonnes_per_nautical_mile == 0.3
+    
+    def test_rejects_zero(self):
+        with pytest.raises(ValueError):
+            FuelRate(tonnes_per_nautical_mile=0.0)
+    
+    def test_rejects_negative(self):
+        with pytest.raises(ValueError):
+            FuelRate(tonnes_per_nautical_mile=-1.0)
